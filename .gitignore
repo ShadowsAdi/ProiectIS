@@ -1,7 +1,0 @@
-/.idea
-frontend/configurations/settings.py
-frontend/manage.py
-/frontend/register/migrations
-/frontend/register/__pycache__
-/frontend/configurations
-frontend/register/__init__.py
