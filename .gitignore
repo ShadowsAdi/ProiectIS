@@ -3,5 +3,7 @@ frontend/configurations/settings.py
 frontend/manage.py
 /frontend/register/migrations
 /frontend/register/__pycache__
-/frontend/configurations
+/frontend/configurations/settings.py
 frontend/register/__init__.py
+/frontend/configurations/__pycache__
+frontend/configurations/__init__.py
