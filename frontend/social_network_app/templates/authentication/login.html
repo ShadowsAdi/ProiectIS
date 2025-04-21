@@ -1,0 +1,23 @@
+{%extends 'layouts/base_auth.html'%}
+
+{% load static %}
+{% load crispy_forms_tags %}
+{% load form_tags %}
+
+ <!-- Dynamic form content -->
+{% block form_fields %}
+<div class="input-group mb-3">
+    <span class="input-group-text">
+        <i class="bi bi-person"></i>
+    </span>
+    {{ form.username|add_class:"form-control"|add_placeholder:"Enter your username/email" }}
+</div>
+<div class="input-group mb-3">
+    <span class="input-group-text">
+        <i class="bi bi-lock"></i>
+    </span>
+    {{ form.password|add_class:"form-control"|add_placeholder:"Enter your password" }}
+</div>
+{% endblock %}
+
+{% block submit_button %}Sign in{% endblock %}

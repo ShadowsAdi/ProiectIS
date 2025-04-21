@@ -1,3 +1,5 @@
+<!--THIS IS THE BASE HTML CODE FOR PAGES REGISTRATION AND LOGIN -->
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -16,8 +18,26 @@
 </head>
 <body>
     <div class="container mx-auto">
-        {% block content %}
-        {% endblock %}
+        <form method="POST">
+            {% csrf_token %}
+            <!-- App Logo + Title -->
+            {% block form_title %}
+            <div class="content-section text-center">
+                <img src="{% static 'images/app-icon.png' %}" alt="app icon" width="50" height="50">
+                <h4 class="title">The Social Network</h4>
+            </div>
+            {% endblock %}
+
+            <!-- Dynamic form content -->
+            {% block form_fields %}{% endblock %}
+
+            <!-- Submit button -->
+            <div class="input-group mb-3">
+                <button class="btn btn-primary" type="submit">
+                    {% block submit_button %}Submit{% endblock %}
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Bootstrap JS -->
