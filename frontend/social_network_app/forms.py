@@ -8,11 +8,5 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
-        widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
-            'password1': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
-            'password2': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm Password'}),
-        }
 #asta e file-ul unde trb modificat social_network_app/login
 #foloseste template-ul de la UserCreationForm si adauga email

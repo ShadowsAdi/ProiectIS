@@ -4,42 +4,20 @@
 {% load crispy_forms_tags %}
 {% load form_tags %}
 
-{% block form_fields %}
-<div class="input-group mb-3">
-    <span class="input-group-text">
-        <i class="bi bi-person"></i>
+{% block form_password2 %}
+<div class="relative mb-4 confirm">
+    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+        <i class="fas fa-lock"></i>
     </span>
-    {{ form.username|add_class:"form-control"|add_placeholder:"Enter your username" }}
-</div>
-
-<div class="input-group mb-3">
-    <span class="input-group-text">
-        <i class="bi bi-envelope"></i>
-    </span>
-    {{ form.email|add_class:"form-control"|add_placeholder:"Enter your email" }}
-</div>
-
-<div class="input-group mb-3">
-    <span class="input-group-text">
-        <i class="bi bi-lock"></i>
-    </span>
-    {{ form.password1|add_class:"form-control"|add_placeholder:"Enter your password" }}
-    <span class="toggle-password" data-target="id_password1">
+    {{ form.password1|add_class:"pl-10 pr-10 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"|add_placeholder:"Confirm your password" }}
+    <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer toggle-password" data-target="id_password1">
         <i class="fas fa-eye"></i>
     </span>
 </div>
-
-<div class="input-group mb-3">
-    <span class="input-group-text">
-        <i class="bi bi-lock"></i>
-    </span>
-    {{ form.password2|add_class:"form-control"|add_placeholder:"Confirm your password" }}
-    <span class="toggle-password" data-target="id_password2">
-        <i class="fas fa-eye"></i>
-    </span>
+{% endblock form_password2 %}
+{% block already_have_account %}
+<div class="text-sm text-right mt-2">
+    <a href="{% url 'login' %}" class="text-blue-600 hover:underline">Already have an account? Log in</a>
 </div>
-<div style="display: flex">
-    <a href="{% url 'login' %}">Already have an account? Log in</a>
-</div>
-{% endblock %}
+{% endblock already_have_account %}
 

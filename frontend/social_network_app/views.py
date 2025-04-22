@@ -10,11 +10,15 @@ from django.contrib import messages
 
 def register(request):
     if request.method == 'POST':
+        print("POST REQUEST RECEIVED")
         form = RegisterForm(request.POST)
         if form.is_valid():
+            print("form is valid")
             form.save()
             messages.success(request, 'Account created successfully!')
-            return redirect('login')  # Redirect to login page after successful registration
+            return redirect('/auth/login/')  # Redirect to login page after successful registration
+        else:
+            print("Form errors:",form.errors)
     else:
         form = RegisterForm()
     return render(request, 'authentication/register.html', {'form': form})
@@ -46,9 +50,6 @@ def home(request):
 def profile(request):
     # Add any context you need for the profile page
     return render(request, 'app_pages/profile.html')
-
-def messages(request):
-    return render(request, 'app_pages/messages.html')
 
 def notifications(request):
     return render(request, 'app_pages/notifications.html')
