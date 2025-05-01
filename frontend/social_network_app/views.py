@@ -7,6 +7,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect
 from .forms import RegisterForm
 from django.contrib import messages
+# from .models import Post,Friendships
+from django.db.models import Q
 
 def register(request):
     if request.method == 'POST':
@@ -40,10 +42,32 @@ def custom_login(request):
 
 
 def home(request):
+    user = request.user
+    # friendships_user = Friendships.objects.filter(Q(user1=user) | Q(user2=user), status="accepted")
+    #
+    # #fetch all friends of user in order to show their posts on user's main page
+    # friend_ids = [f.user1 for f in friendships_user] + [f.user1 for f in friendships_user]
+    #
+    # #if we put the id of user in friend_ids, we remove it:
+    # friend_ids = [friend_id for friend_id in friend_ids if friend_id != user.id]
+    #
+    # #show posts of all user's friends
+    # posts = Post.objects.filter(user__in=friend_ids).order_by('-created_at')
+    #
     context = {
-        'username': request.user.username,  # Display the logged-in user's username
-        # Add more context here as needed (e.g., posts, notifications, etc.)
+        'user': request.user.username,
+        # 'posts': posts,
     }
+    # if request.method == 'POST':
+    #     form = PostForm(request.POST, request.FILES)
+    #     if form.is_valid():
+    #         post = form.save(commit=False)
+    #         post.user = user
+    #         post.save()
+    #         return redirect('home')  # Redirect to home page after saving
+    # else:
+    #     form = PostForm()
+    # context['form'] = form
     return render(request, 'app_pages/home.html', context)
 
 @login_required

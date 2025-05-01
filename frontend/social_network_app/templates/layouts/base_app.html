@@ -6,10 +6,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Media App</title>
+    <title>The Social Networks</title>
 
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 
     <!-- FontAwesome for icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
@@ -17,77 +17,49 @@
     <!-- Custom styles -->
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body class="flex flex-col min-h-screen">
 
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">SocialApp</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'home' %}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'profile' %}">Profile</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container-fluid d-flex flex-grow-1">
+    <div class="flex flex-grow">
 
         <!-- Sidebar -->
-        <div class="d-flex flex-column bg-light p-3" style="width: 250px; height: 100vh;">
-            <h4 class="text-center mb-4">Menu</h4>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link active" href="{% url 'home' %}">
-                        <i class="fas fa-home"></i> Home
+        <div class="flex flex-col bg-gray-100 p-7">
+            <h4 class="text-center mb-20 text-lg font-semibold">Aici o sa fie icon</h4>
+            <ul class="flex flex-col space-y-4 mt-20">
+                <li>
+                    <a href="{% url 'home' %}" class="flex items-center text-gray-700 font-medium hover:text-blue-600">
+                        <i class="fas fa-home mr-2"></i> Home
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'profile' %}">
-                        <i class="fas fa-user"></i> Profile
+                <li>
+                    <a href="{% url 'profile' %}" class="flex items-center text-gray-700 hover:text-blue-600 ">
+                        <i class="fas fa-user mr-2"></i> Profile
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'notifications' %}">
-                        <i class="fas fa-bell"></i> Notifications
+                <li>
+                    <a href="{% url 'notifications' %}" class="flex items-center text-gray-700 hover:text-blue-600 ">
+                        <i class="fas fa-bell mr-2"></i> Notifications
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'settings' %}">
-                        <i class="fas fa-cogs"></i> Settings
+                <li>
+                    <a href="{% url 'settings' %}" class="flex items-center text-gray-700 hover:text-blue-600 ">
+                        <i class="fas fa-cogs mr-2"></i> Settings
                     </a>
                 </li>
             </ul>
         </div>
-
-        <!-- Main Content Area -->
-        <div class="container-fluid p-4">
-            {% block content %}
-            <!-- This is where the content from each page will be injected -->
-            {% endblock %}
-        </div>
-
+        <main class="flex-1 p-6">
+        {% block content %}
+        <!-- Default content (can be empty) -->
+        {% endblock content %}
+        </main>
     </div>
-
     <!-- Footer -->
-    <footer class="bg-primary text-white text-center py-3 mt-auto">
+    <footer class="bg-blue-600 text-white text-center py-3 mt-auto">
         <p>&copy; 2025 SocialApp. All rights reserved.</p>
     </footer>
 
-    <!-- Bootstrap 5 JS and Popper.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <!-- Font Awesome (still needed for icons) -->
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
 
     <!-- Custom JS -->
     <script src="{% static 'scripts.js' %}"></script>
