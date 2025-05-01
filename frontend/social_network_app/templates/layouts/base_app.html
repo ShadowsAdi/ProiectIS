@@ -1,0 +1,68 @@
+<!--THIS IS THE BASE HTML CODE FOR PAGES IN THE APP -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Social Networks</title>
+
+    <!-- Tailwind -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- FontAwesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <div class="flex flex-grow">
+
+        <!-- Sidebar -->
+        <div class="flex flex-col bg-gray-100 p-7">
+            <h4 class="text-center mb-20 text-lg font-semibold">Aici o sa fie icon</h4>
+            <ul class="flex flex-col space-y-4 mt-20">
+                <li>
+                    <a href="{% url 'home' %}" class="flex items-center text-gray-700 font-medium hover:text-blue-600">
+                        <i class="fas fa-home mr-2"></i> Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'profile' %}" class="flex items-center text-gray-700 hover:text-blue-600 ">
+                        <i class="fas fa-user mr-2"></i> Profile
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'notifications' %}" class="flex items-center text-gray-700 hover:text-blue-600 ">
+                        <i class="fas fa-bell mr-2"></i> Notifications
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'settings' %}" class="flex items-center text-gray-700 hover:text-blue-600 ">
+                        <i class="fas fa-cogs mr-2"></i> Settings
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <main class="flex-1 p-6">
+        {% block content %}
+        <!-- Default content (can be empty) -->
+        {% endblock content %}
+        </main>
+    </div>
+    <!-- Footer -->
+    <footer class="bg-blue-600 text-white text-center py-3 mt-auto">
+        <p>&copy; 2025 SocialApp. All rights reserved.</p>
+    </footer>
+
+    <!-- Font Awesome (still needed for icons) -->
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+
+    <!-- Custom JS -->
+    <script src="{% static 'scripts.js' %}"></script>
+
+</body>
+</html>

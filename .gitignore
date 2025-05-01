@@ -1,9 +1,10 @@
 /.idea
 frontend/configurations/settings.py
-frontend/manage.py
-/frontend/register/migrations
-/frontend/register/__pycache__
+/frontend/social_network_app/migrations
+/frontend/social_network_app/__pycache__
 /frontend/configurations/settings.py
-frontend/register/__init__.py
+frontend/social_network_app/__init__.py
 /frontend/configurations/__pycache__
 frontend/configurations/__init__.py
+/frontend/static
+*.pyc

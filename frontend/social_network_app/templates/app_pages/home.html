@@ -1,0 +1,26 @@
+{%extends 'layouts/base_app.html'%}
+
+{% load static %}
+{% load crispy_forms_tags %}
+{% load form_tags %}
+
+{% block content %}
+    <button onclick="toggleFormVisibility()" class="create_post_button absolute bottom-20 right-20 bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400" formaction="">Create Post (asta tot icon o sa fie probabil)</button>
+    <!-- Form to Create Post -->
+    <div id="insert_post" class="mt-6">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}  <!-- Render the form fields as paragraphs -->
+            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                Post
+            </button>
+        </form>
+    </div>
+
+    <!-- Display Posts -->
+    <div class="posts mt-6">
+        {% for post in posts %}
+            {% include 'layouts/base_posts.html' %}
+        {% endfor %}
+    </div>
+{% endblock content %}

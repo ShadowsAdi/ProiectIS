@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'register',
+    'social_network_app',
     'crispy_forms',
 ]
 
@@ -75,10 +75,12 @@ WSGI_APPLICATION = 'configurations.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.something',
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'nume_proiect',
         'USER': 'nume_user',
         'PASSWORD': 'parola',
+		'HOST': 'hostname',
+        'PORT': '3306',
     }
 }
 
