@@ -1,6 +1,5 @@
 /.idea
 frontend/configurations/settings.py
-frontend/manage.py
 /frontend/social_network_app/migrations
 /frontend/social_network_app/__pycache__
 /frontend/configurations/settings.py
