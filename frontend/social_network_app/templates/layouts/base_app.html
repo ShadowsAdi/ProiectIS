@@ -16,37 +16,13 @@
 
     <!-- Custom styles -->
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+
+    <script src="https://unpkg.com/alpinejs" defer></script>
 </head>
 <body class="flex flex-col min-h-screen">
-
+    <!-- Topbar -->
+    {% include "components/topbar.html" %}
     <div class="flex flex-grow">
-
-        <!-- Sidebar -->
-        <div class="flex flex-col bg-gray-100 p-7">
-            <h4 class="text-center mb-20 text-lg font-semibold">Aici o sa fie icon</h4>
-            <ul class="flex flex-col space-y-4 mt-20">
-                <li>
-                    <a href="{% url 'home' %}" class="flex items-center text-gray-700 font-medium hover:text-blue-600">
-                        <i class="fas fa-home mr-2"></i> Home
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'profile' %}" class="flex items-center text-gray-700 hover:text-blue-600 ">
-                        <i class="fas fa-user mr-2"></i> Profile
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'notifications' %}" class="flex items-center text-gray-700 hover:text-blue-600 ">
-                        <i class="fas fa-bell mr-2"></i> Notifications
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'settings' %}" class="flex items-center text-gray-700 hover:text-blue-600 ">
-                        <i class="fas fa-cogs mr-2"></i> Settings
-                    </a>
-                </li>
-            </ul>
-        </div>
         <main class="flex-1 p-6">
         {% block content %}
         <!-- Default content (can be empty) -->
