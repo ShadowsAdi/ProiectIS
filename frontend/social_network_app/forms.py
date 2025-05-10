@@ -2,8 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-# from frontend.social_network_app.models import Post
-
+from .models import Post
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -14,7 +13,8 @@ class RegisterForm(UserCreationForm):
 #asta e file-ul unde trb modificat social_network_app/login
 #foloseste template-ul de la UserCreationForm si adauga email
 
-# class PostForm(forms.ModelForm):
-#     class Meta:
-#         model = Post
-#         fields = ['title', 'content']
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['title', 'content']
+
