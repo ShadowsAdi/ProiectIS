@@ -6,5 +6,4 @@ frontend/configurations/settings.py
 frontend/social_network_app/__init__.py
 /frontend/configurations/__pycache__
 frontend/configurations/__init__.py
-/frontend/static
 *.pyc
