@@ -43,6 +43,16 @@ jobs:
       working-directory: frontend
       run: python manage.py collectstatic --noinput
 
+    - name: Clean remote dir
+      uses: appleboy/ssh-action@master
+      with:
+        host: adi.leaguecs.ro
+        username: root
+        password: ${{ secrets.sftp_password }}
+        port: 22
+        script: |
+          rm -rf /var/www/html/proiectis/*
+      
     - name: 📂 Deploy via SFTP
       uses: appleboy/scp-action@master
       with:
@@ -51,7 +61,6 @@ jobs:
         password: ${{ secrets.sftp_password }}
         port: 22
         source: "./frontend"
-        rm: "/var/www/html/proiectis/"
         target: "/var/www/html/proiectis/"
         strip_components: 1
 
