@@ -51,6 +51,7 @@ jobs:
         password: ${{ secrets.sftp_password }}
         port: 22
         source: "./frontend"
+        rm: "/var/www/html/proiectis/"
         target: "/var/www/html/proiectis/"
         strip_components: 1
 
