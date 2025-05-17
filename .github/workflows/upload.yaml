@@ -29,15 +29,17 @@ jobs:
         pip install -r requirements.txt
 
     - name: 🛠 Copy and configure settings.py
+      working-directory: frontend/configurations
       run: |
-        cp project/settings.py.example project/settings.py
-        sed -i 's/NAME = .*/NAME = "${{ secrets.DB_NAME }}"/' project/settings.py
-        sed -i 's/USER = .*/USER = "${{ secrets.DB_USER }}"/' project/settings.py
-        sed -i 's/PASSWORD = .*/PASSWORD = "${{ secrets.DB_PASSWORD }}"/' project/settings.py
-        sed -i 's/HOST = .*/HOST = "${{ secrets.DB_HOST }}"/' project/settings.py
-        sed -i 's/PORT = .*/PORT = "${{ secrets.DB_PORT || '3306' }}"/' project/settings.py
+        cp settings.py.example settings.py
+        sed -i 's/NAME = .*/NAME = "${{ secrets.DB_NAME }}"/' settings.py
+        sed -i 's/USER = .*/USER = "${{ secrets.DB_USER }}"/' settings.py
+        sed -i 's/PASSWORD = .*/PASSWORD = "${{ secrets.DB_PASSWORD }}"/' settings.py
+        sed -i 's/HOST = .*/HOST = "${{ secrets.DB_HOST }}"/' settings.py
+        sed -i 's/PORT = .*/PORT = "${{ secrets.DB_PORT || '3306' }}"/' settings.py
 
     - name: Collect static files
+      working-directory: frontend
       run: python manage.py collectstatic --noinput
 
     - name: 📂 Deploy via SFTP
@@ -47,7 +49,7 @@ jobs:
         username: root
         password: ${{ secrets.sftp_password }}
         port: 22
-        source: "./"
+        source: "./frontend"
         target: "/var/www/html/proiectis/"
         strip_components: 1
 
@@ -56,8 +58,8 @@ jobs:
       with:
         host: adi.leaguecs.ro
         username: root
-        password: ${{ secrets.SFTP_PASSWORD }}
+        password: ${{ secrets.sftp_password }}
         port: 22
         script: |
-          chown -R root:root /var/www/proiectis
+          chown -R root:root /var/www/html/proiectis
           chmod -R 755 /var/www/html/proiectis
