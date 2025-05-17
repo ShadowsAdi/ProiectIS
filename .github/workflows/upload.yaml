@@ -33,11 +33,17 @@ jobs:
       run: |
         cp settings.py.example settings.py
         sed -i "s/^ALLOWED_HOSTS = .*/ALLOWED_HOSTS = ['adi.leaguecs.ro', 'localhost', '127.0.0.1']/" settings.py
-        sed -i 's/NAME = .*/NAME = "${{ secrets.DB_NAME }}"/' settings.py
-        sed -i 's/USER = .*/USER = "${{ secrets.DB_USER }}"/' settings.py
-        sed -i 's/PASSWORD = .*/PASSWORD = "${{ secrets.DB_PASSWORD }}"/' settings.py
-        sed -i 's/HOST = .*/HOST = "${{ secrets.DB_HOST }}"/' settings.py
-        sed -i 's/PORT = .*/PORT = "${{ secrets.DB_PORT || '3306' }}"/' settings.py
+        sed -i "s/NAME = .*/NAME = \"${DB_NAME}\"/" settings.py
+        sed -i "s/USER = .*/USER = \"${DB_USER}\"/" settings.py
+        sed -i "s/PASSWORD = .*/PASSWORD = \"${DB_PASSWORD}\"/" settings.py
+        sed -i "s/HOST = .*/HOST = \"${DB_HOST}\"/" settings.py
+        sed -i "s/PORT = .*/PORT = \"${DB_PORT:-3306}\"/" settings.py
+      env:
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_PORT: ${{ secrets.DB_PORT }}
 
     - name: Collect static files
       working-directory: frontend
