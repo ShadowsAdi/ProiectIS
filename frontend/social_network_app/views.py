@@ -7,10 +7,13 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect
 from .forms import RegisterForm, PostForm
 from django.contrib import messages
-from .models import Post,Friendships
+from .models import Post, Friendships, Profile
 from django.db.models import Q
 
 def register(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+
     if request.method == 'POST':
         print("POST REQUEST RECEIVED")
         form = RegisterForm(request.POST)
@@ -27,7 +30,10 @@ def register(request):
 
 
 def custom_login(request):
-   if request.method == 'POST':
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
        form = AuthenticationForm(request,data=request.POST)
        if form.is_valid():
            user = form.get_user()
@@ -36,12 +42,15 @@ def custom_login(request):
            return redirect('home')  # Redirect after successful login
        else:
            messages.error(request, "Invalid username or password.")
-   else:
+    else:
         form = AuthenticationForm()
-   return render(request, 'authentication/login.html', {'form': form})
+    return render(request, 'authentication/login.html', {'form': form})
 
 
 def home(request):
+    if not request.user.is_authenticated:
+        return redirect('register')
+
     user = request.user
     friendships_user = Friendships.objects.filter(Q(user1=user) | Q(user2=user), status="accepted")
 
@@ -73,11 +82,20 @@ def home(request):
 
 @login_required
 def profile(request):
-    # Add any context you need for the profile page
-    return render(request, 'app_pages/profile.html')
+    if not request.user.is_authenticated:
+        return redirect('register')
+
+    profile = Profile.objects.filter(user=request.user).first()
+    return render(request, 'app_pages/profile.html', {'profile': profile})
 
 def notifications(request):
+    if not request.user.is_authenticated:
+        return redirect('register')
+
     return render(request, 'app_pages/notifications.html')
 
 def settings(request):
+    if not request.user.is_authenticated:
+        return redirect('register')
+
     return render(request, 'app_pages/settings.html')

@@ -18,11 +18,10 @@ from django.contrib import admin
 from django.urls import include,path
 from django.conf import settings
 from django.conf.urls.static import static
-from django.shortcuts import redirect
+#from social_network_app.views import root_redirect
 
 urlpatterns = [
-    path('',lambda request: redirect('register')),
-    path('auth/',include('social_network_app.urls')), #social_network_app
-    path('app/',include('social_network_app.urls')),
+    path('', include('social_network_app.urls')),
     path('admin/', admin.site.urls),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
