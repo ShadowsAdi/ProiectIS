@@ -54,7 +54,7 @@ jobs:
     - name: 🔐 SSH fix file permissions
       uses: appleboy/ssh-action@master
       with:
-        host: 188.241.119.73
+        host: adi.leaguecs.ro
         username: root
         password: ${{ secrets.SFTP_PASSWORD }}
         port: 22
