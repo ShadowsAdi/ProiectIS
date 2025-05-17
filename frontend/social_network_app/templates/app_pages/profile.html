@@ -1,1 +1,48 @@
 {%extends 'layouts/base_app.html'%}
+{% load static %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+  <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
+    <!-- Profile picture -->
+    <div class="flex-shrink-0">
+        {% if request.user.profile.profile_picture %}
+            <img src="{{ request.user.profile.profile_picture.url }}" alt="Avatar"
+                 class="w-32 h-32 rounded-full object-cover">
+        {% else %}
+            <img src="{% if request.user.profile.gender == 'female' %}
+                         {% static 'images/avatars/female_default.png' %}
+                     {% else %}
+                         {% static 'images/avatars/male_default.png' %}
+                     {% endif %}"
+                 alt="User Avatar"
+                 class="w-32 h-32 rounded-full object-cover">
+        {% endif %}
+    </div>
+
+    <!-- User info -->
+    <div class="flex-1">
+      <h1 class="text-3xl font-bold text-gray-900">{{ user.fullname|default:user.username }}</h1>
+      <p class="text-gray-600">@{{ user.username }}</p>
+
+      <div class="mt-4 space-y-2 text-gray-700">
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        {% if profile.gender %}
+        <p><strong>Gender:</strong> {{ profile.get_gender_display }}</p>
+        {% endif %}
+        {% if profile.date_of_birth %}
+        <p><strong>Date of Birth:</strong> {{ profile.date_of_birth|date:"F j, Y" }}</p>
+        {% endif %}
+        <p><strong>Karma Score:</strong> {{ user.karma_score }}</p>
+        {% if user.role %}
+        <p><strong>Role:</strong> {{ user.role.name }}</p>
+        {% endif %}
+        {% if user.banned_at %}
+        <p class="text-red-600"><strong>Banned At:</strong> {{ user.banned_at|date:"F j, Y, g:i a" }}</p>
+        <p><strong>Reason:</strong> {{ user.banned_reason }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

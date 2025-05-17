@@ -7,14 +7,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect
 from .forms import RegisterForm, PostForm
 from django.contrib import messages
-from .models import Post,Friendships
+from .models import Post, Friendships, Profile
 from django.db.models import Q
-
-def root_redirect(request):
-    if request.user.is_authenticated:
-        return redirect('home')
-    else:
-        return redirect('register')
 
 def register(request):
     if request.user.is_authenticated:
@@ -54,6 +48,9 @@ def custom_login(request):
 
 
 def home(request):
+    if not request.user.is_authenticated:
+        return redirect('register')
+
     user = request.user
     friendships_user = Friendships.objects.filter(Q(user1=user) | Q(user2=user), status="accepted")
 
@@ -85,11 +82,20 @@ def home(request):
 
 @login_required
 def profile(request):
-    # Add any context you need for the profile page
-    return render(request, 'app_pages/profile.html')
+    if not request.user.is_authenticated:
+        return redirect('register')
+
+    profile = Profile.objects.filter(user=request.user).first()
+    return render(request, 'app_pages/profile.html', {'profile': profile})
 
 def notifications(request):
+    if not request.user.is_authenticated:
+        return redirect('register')
+
     return render(request, 'app_pages/notifications.html')
 
 def settings(request):
+    if not request.user.is_authenticated:
+        return redirect('register')
+
     return render(request, 'app_pages/settings.html')
