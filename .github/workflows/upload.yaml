@@ -82,3 +82,15 @@ jobs:
         script: |
           chown -R root:root /var/www/html/proiectis
           chmod -R 755 /var/www/html/proiectis
+
+    - name: 🔄 Restart Gunicorn service
+      uses: appleboy/ssh-action@master
+      with:
+        host: adi.leaguecs.ro
+        username: root
+        password: ${{ secrets.sftp_password }}
+        port: 22
+        script: |
+          pkill gunicorn
+          cd /var/www/html/proiectis/frontend
+          gunicorn configurations.wsgi:application --bind 0.0.0.0:8000 --daemon
