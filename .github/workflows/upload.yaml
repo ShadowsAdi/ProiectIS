@@ -1,0 +1,62 @@
+name: 🚀 Deploy Django site on push
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - "**.md"
+
+jobs:
+  web-deploy:
+    name: 🎉 Deploy Django
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: 🧪 Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: 🛠 Copy and configure settings.py
+      run: |
+        cp project/settings.py.example project/settings.py
+        sed -i 's/NAME = .*/NAME = "${{ secrets.DB_NAME }}"/' project/settings.py
+        sed -i 's/USER = .*/USER = "${{ secrets.DB_USER }}"/' project/settings.py
+        sed -i 's/PASSWORD = .*/PASSWORD = "${{ secrets.DB_PASSWORD }}"/' project/settings.py
+        sed -i 's/HOST = .*/HOST = "${{ secrets.DB_HOST }}"/' project/settings.py
+        sed -i 's/PORT = .*/PORT = "${{ secrets.DB_PORT || '3306' }}"/' project/settings.py
+
+    - name: Collect static files
+      run: python manage.py collectstatic --noinput
+
+    - name: 📂 Deploy via SFTP
+      uses: appleboy/scp-action@master
+      with:
+        host: adi.leaguecs.ro
+        username: root
+        password: ${{ secrets.sftp_password }}
+        port: 22
+        source: "./"
+        target: "/var/www/html/proiectis/"
+        strip_components: 1
+
+    - name: 🔐 SSH fix file permissions
+      uses: appleboy/ssh-action@master
+      with:
+        host: 188.241.119.73
+        username: root
+        password: ${{ secrets.SFTP_PASSWORD }}
+        port: 22
+        script: |
+          chown -R root:root /var/www/proiectis
+          chmod -R 755 /var/www/html/proiectis
