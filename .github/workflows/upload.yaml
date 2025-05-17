@@ -32,6 +32,7 @@ jobs:
       working-directory: frontend/configurations
       run: |
         cp settings.py.example settings.py
+        sed -i "s/^ALLOWED_HOSTS = .*/ALLOWED_HOSTS = ['adi.leaguecs.ro', 'localhost', '127.0.0.1']/" settings.py
         sed -i 's/NAME = .*/NAME = "${{ secrets.DB_NAME }}"/' settings.py
         sed -i 's/USER = .*/USER = "${{ secrets.DB_USER }}"/' settings.py
         sed -i 's/PASSWORD = .*/PASSWORD = "${{ secrets.DB_PASSWORD }}"/' settings.py
