@@ -1,27 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.conf import settings
+import json
 
-class Role(models.Model):
-    name = models.CharField(max_length=20, unique=True)  # 'admin', 'moderator', 'membru'
-
-    def __str__(self):
-        return self.name
-
-# Custom user model (extinde AbstractUser)
 class CustomUser(AbstractUser):
     id = models.AutoField(primary_key=True)
     fullname = models.CharField(max_length=100, blank=True, null=True)
     email_verified_at = models.DateTimeField(blank=True, null=True)
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     karma_score = models.IntegerField(default=100, null=True)
-    role = models.ForeignKey('Role', null=True, blank=True, on_delete=models.SET_NULL)
     banned_at = models.DateTimeField(blank=True, null=True)
     banned_reason = models.CharField(max_length=255, blank=True, null=True)
     banned_by = models.IntegerField(blank=True, null=True)
     deleted_at = models.DateTimeField(blank=True, null=True)
 
-    # Fix for reverse accessor clash on groups and user_permissions:
     groups = models.ManyToManyField(
         Group,
         related_name='customuser_set',
@@ -42,7 +34,6 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
 
-# Profilul utilizatorului
 class Profile(models.Model):
     GENDER_CHOICES = [
         ('male', 'Male'),
@@ -60,7 +51,6 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.username}'s profile"
 
-# Postările
 class Post(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -69,26 +59,50 @@ class Post(models.Model):
     content = models.TextField()
     post_score = models.FloatField(editable=False, default=0)
     views = models.IntegerField(default=0)
+    is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        from .ai_moderation_service import moderate_post
+        is_toxic = moderate_post(self.id, None, 'post')
+
+        if not is_toxic and not self.is_published:
+            self.is_published = True
+            self.post_score = 1.0
+            super().save(update_fields=['is_published', 'post_score'])
 
     def __str__(self):
         return self.title
 
 class Comment(models.Model):
+    id = models.AutoField(primary_key=True)
     post = models.ForeignKey('Post', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     comment_score = models.FloatField(default=0)
+    is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        from .ai_moderation_service import moderate_post
+        is_toxic = moderate_post(self.post, self.id, 'comment')
+
+        if not is_toxic and not self.is_published:
+            self.is_published = True
+            self.comment_score = 1.0
+            super().save(update_fields=['is_published', 'comment_score'])
+
     def __str__(self):
         return f"Comment by {self.user} on {self.post}"
 
-# Relațiile de prietenie
 class Friendships(models.Model):
     id = models.AutoField(primary_key=True)
     user1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user1')
@@ -110,12 +124,14 @@ class Friendships(models.Model):
 class NLPAnalysisLog(models.Model):
     TARGET_TYPE_CHOICES = [
         ('post', 'Post'),
-        ('commentariu', 'Commentariu'),
+        ('comment', 'Comment'),
     ]
 
+    id = models.AutoField(primary_key=True)
     target_type = models.CharField(max_length=20, choices=TARGET_TYPE_CHOICES)
     post = models.ForeignKey('Post', on_delete=models.CASCADE)
     comment = models.ForeignKey('Comment', null=True, blank=True, on_delete=models.CASCADE)
+    is_toxic = models.BooleanField(default=False)
     result = models.TextField()
     run_time = models.DateTimeField(auto_now_add=True)
 
