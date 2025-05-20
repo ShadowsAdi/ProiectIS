@@ -24,6 +24,22 @@
     {% include "components/topbar.html" %}
     <div class="flex flex-grow">
         <main class="flex-1 p-6">
+        {% if messages %}
+          <div class="mb-4">
+            {% for message in messages %}
+              <div
+                class="p-3 rounded mb-2
+                {% if message.tags == 'error' %}bg-red-200 text-red-800
+                {% elif message.tags == 'success' %}bg-green-200 text-green-800
+                {% else %}bg-gray-200 text-gray-800{% endif %}"
+                role="alert"
+              >
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
         {% block content %}
         <!-- Default content (can be empty) -->
         {% endblock content %}

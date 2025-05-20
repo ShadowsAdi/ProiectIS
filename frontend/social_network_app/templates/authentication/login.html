@@ -21,10 +21,15 @@
 {% endblock form_password %}
 {% block form_password2 %}
 {% endblock form_password2 %}
-{% block already_have_account %}
-{% endblock already_have_account %}
 {% block submit_button %}Sign in{% endblock %}
 {% block choose_gender %}
 {% endblock choose_gender %}
 {% block birth_date %}
 {% endblock birth_date %}
+
+{% block already_have_account %}
+<div class="text-sm text-right mt-2">
+    <a href="{% url 'register' %}" class="text-blue-600 hover:underline">You don't have an account? Register</a>
+</div>
+
+{% endblock already_have_account %}
