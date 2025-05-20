@@ -4,10 +4,11 @@ from urllib import request
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import RegisterForm, PostForm
 from django.contrib import messages
-from .models import Post, Friendships, Profile
+from .models import Post, Friendships, Profile, CustomUser
 from django.db.models import Q
 
 def register(request):
@@ -80,13 +81,36 @@ def home(request):
     }
     return render(request, 'app_pages/home.html', context)
 
-@login_required
-def profile(request):
-    if not request.user.is_authenticated:
-        return redirect('register')
+def search_users(request):
+    query = request.GET.get('q', '')
+    print(query)
+    results = []
 
-    profile = Profile.objects.filter(user=request.user).first()
-    return render(request, 'app_pages/profile.html', {'profile': profile})
+    if query:
+        users = CustomUser.objects.filter(
+            Q(username__icontains=query) | Q(email__icontains=query)
+        )[:10]  # Limit to 10 results
+        results = [
+            {'username': user.username, 'email': user.email}
+            for user in users
+        ]
+    return JsonResponse({'results': results})
+
+@login_required
+def profile(request, username=None):
+    if username is None:
+        # Show logged-in user's profile
+        viewed_user = request.user
+    else:
+        # Show other user's profile
+        viewed_user = get_object_or_404(CustomUser, username=username)
+
+    profile = Profile.objects.filter(user=viewed_user).first()
+
+    return render(request, 'app_pages/profile.html', {
+        'user': viewed_user,
+        'profile': profile
+    })
 
 def notifications(request):
     if not request.user.is_authenticated:
