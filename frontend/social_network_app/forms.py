@@ -3,7 +3,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from .models import Post, Profile
+from .models import Post, Profile, CustomUser
+
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -55,3 +56,13 @@ class PostForm(forms.ModelForm):
         if images and images.size > MAX_FILE_SIZE:
             raise ValidationError("Images should not exceed " + str(MAX_FILE_SIZE) + "MB")
         return images
+
+class SettingsForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email']
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['gender', 'date_of_birth', 'profile_picture']
