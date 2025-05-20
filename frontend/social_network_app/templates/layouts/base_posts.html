@@ -1,8 +1,24 @@
 <!-- Base html for posts on social media -->
 
 {% load static %}
-<!-- base.posts.html -->
-<div>
-    <h2>{{ post.title}} </h2>
-    <h2>{{ post.content}} </h2>
+<!-- base_posts.html -->
+<div class="max-w-xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ post.title }}</h3>
+    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ post.content }}</p>
+
+    {% if post.images %}
+        <img src="{{ post.images.url }}" alt="Post Image" class="mt-4 rounded-md max-h-96 object-cover w-full" />
+    {% endif %}
+
+    {% if post.files %}
+        <a href="{{ post.files.url }}" class="block mt-3 text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
+            Download Attachment
+        </a>
+    {% endif %}
+
+    <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+        Posted by: <span class="font-medium">{{ post.user.username }}</span>
+        <!-- You can add date/time here if you have a timestamp field -->
+    </div>
 </div>
+

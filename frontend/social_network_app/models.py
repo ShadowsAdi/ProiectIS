@@ -57,6 +57,8 @@ class Post(models.Model):
     ip_address = models.CharField(max_length=45)
     title = models.CharField(max_length=60)
     content = models.TextField()
+    files = models.FileField(upload_to='post_files/', null=True, blank=True)
+    images = models.ImageField(upload_to='post_images/', null=True, blank=True)
     post_score = models.FloatField(editable=False, default=0)
     views = models.IntegerField(default=0)
     is_published = models.BooleanField(default=False)

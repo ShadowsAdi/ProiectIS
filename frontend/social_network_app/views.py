@@ -63,9 +63,9 @@ def home(request):
     #show posts of all user's friends
     # posts = Post.objects.filter(user__in=friend_ids).order_by('-created_at')
 
-    posts = Post.objects.all()
+    posts = Post.objects.filter(is_published=True)
     if request.method == 'POST':
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             post.user = user
