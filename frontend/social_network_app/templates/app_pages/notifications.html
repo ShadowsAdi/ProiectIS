@@ -1,1 +1,25 @@
-{%extends 'layouts/base_app.html'%}
+{% extends 'layouts/base_app.html' %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Friend Requests</h2>
+
+{% if pending_requests %}
+    <ul class="space-y-2">
+        {% for request in pending_requests %}
+        <li class="bg-white p-4 rounded shadow">
+            <p><strong>{{ request.user1.username }}</strong> sent you a friend request.</p>
+            <form method="post" action="{% url 'accept_friend_request' request.user1.username %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded">Accept</button>
+            </form>
+            <form method="post" action="{% url 'decline_friend_request' request.user1.username %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded">Decline</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No new friend requests.</p>
+{% endif %}
+{% endblock %}

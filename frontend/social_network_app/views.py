@@ -1,9 +1,9 @@
 # social_network_app/views.py
 from urllib import request
-
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -13,6 +13,11 @@ from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponse
 from django.contrib import messages
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST
+from .forms import RegisterForm, PostForm, SettingsForm, ProfileForm
+from .models import Post, Friendships, Profile, CustomUser
 from django.db.models import Q
 from .forms import RegisterForm, PostForm
 from .models import CustomUser, Post, Friendships, Profile
@@ -107,22 +112,31 @@ def home(request):
         return redirect('register')
 
     user = request.user
-    friendships_user = Friendships.objects.filter(Q(user1=user) | Q(user2=user), status="accepted")
 
-    #fetch all friends of user in order to show their posts on user's main page
-    friend_ids = [f.user1 for f in friendships_user] + [f.user2 for f in friendships_user]
+    friendships_user = Friendships.objects.filter(
+        Q(user1=user) | Q(user2=user),
+        status="accepted"
+    )
 
-    #if we put the id of user in friend_ids, we remove it:
-    friend_ids = [friend_id for friend_id in friend_ids if friend_id != user]
+    # Get all friend user IDs (excluding the user themself)
+    friend_ids = set()
+    for friendship in friendships_user:
+        if friendship.user1 == user:
+            friend_ids.add(friendship.user2.id)
+        else:
+            friend_ids.add(friendship.user1.id)
 
-    #show posts of all user's friends
+    my_posts = Post.objects.filter(user=user, is_published=True)
+    friend_posts = Post.objects.filter(user__id__in=friend_ids, is_published=True)
+    others_posts = Post.objects.exclude(
+        Q(user=user) | Q(user__id__in=friend_ids)
+    ).filter(is_published=True)
 
-    # posts = Post.objects.filter(user__in=friend_ids).order_by('-created_at')
-
-    posts = Post.objects.all()
+    all_posts = list(my_posts) + list(friend_posts) + list(others_posts)
+    all_posts.sort(key=lambda x: x.created_at, reverse=True)
 
     if request.method == 'POST':
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
             post.user = user
@@ -133,31 +147,117 @@ def home(request):
 
     context = {
         'user': request.user.username,
-        'posts': posts,
+        'posts': all_posts,
         'form': form,
     }
     return render(request, 'app_pages/home.html', context)
 
-@login_required
-def profile(request):
-    if not request.user.is_authenticated:
-        return redirect('register')
+def search_users(request):
+    query = request.GET.get('q', '')
+    print(query)
+    results = []
 
-    profile = Profile.objects.filter(user=request.user).first()
-    return render(request, 'app_pages/profile.html', {'profile': profile})
+    if query:
+        users = CustomUser.objects.filter(
+            Q(username__icontains=query) | Q(email__icontains=query)
+        )[:10]  # Limit to 10 results
+        results = [
+            {'username': user.username, 'email': user.email}
+            for user in users
+        ]
+    return JsonResponse({'results': results})
+
+@login_required
+def profile(request, username=None):
+    if username is None:
+        # Show logged-in user's profile
+        viewed_user = request.user
+    else:
+        # Show other user's profile
+        viewed_user = get_object_or_404(CustomUser, username=username)
+
+    profile = Profile.objects.filter(user=viewed_user).first()
+
+    return render(request, 'app_pages/profile.html', {
+        'user': viewed_user,
+        'profile': profile
+    })
+
+@login_required
+def send_friend_request(request, username):
+    to_user = get_object_or_404(CustomUser, username=username)
+    if request.user == to_user:
+        return redirect('home')
+    existing = Friendships.objects.filter(
+        (Q(user1=request.user) & Q(user2=to_user)) |
+        (Q(user1=to_user) & Q(user2=request.user))
+    ).first()
+
+    if existing:
+        # Optional: Update status if previously deleted
+        if existing.status == 'none' and existing.deleted_at is not None:
+            existing.status = 'pending'
+            existing.deleted_at = None
+            existing.save()
+        return redirect('user_profile', username=username)
+
+        # Create a new pending friendship
+    Friendships.objects.create(user1=request.user, user2=to_user, status='pending')
+    return redirect('user_profile', username=username)
+
+@require_POST
+@login_required
+def accept_friend_request(request, username):
+    from_user = get_object_or_404(CustomUser, username=username)
+    friendship = Friendships.objects.filter(user1=from_user, user2=request.user, status='pending').first()
+    if friendship:
+        friendship.status = 'accepted'
+        friendship.save()
+        messages.success(request, f"You are now friends with {from_user.username}.")
+    return redirect('notifications')
+
+
+@require_POST
+@login_required
+def decline_friend_request(request, username):
+    from_user = get_object_or_404(CustomUser, username=username)
+    friendship = Friendships.objects.filter(user1=from_user, user2=request.user, status='pending').first()
+    if friendship:
+        friendship.delete()
+        messages.info(request, f"You declined the friend request from {from_user.username}.")
+    return redirect('notifications')
+
 
 def notifications(request):
     if not request.user.is_authenticated:
         return redirect('register')
+    pending_requests = Friendships.objects.filter(user2=request.user, status='pending')
+    return render(request, 'app_pages/notifications.html', {'pending_requests': pending_requests})
 
-    return render(request, 'app_pages/notifications.html')
-
+@login_required
 def settings(request):
-    if not request.user.is_authenticated:
-        return redirect('register')
+    user = request.user
+    profile = user.profile
 
-    return render(request, 'app_pages/settings.html')
+    if request.method == 'POST':
+        user_form = SettingsForm(request.POST, instance=user)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
 
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            return redirect('settings')  # redirect to settings after saving
+    else:
+        user_form = SettingsForm(instance=user)
+        profile_form = ProfileForm(instance=profile)
+
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form
+    }
+    return render(request, 'app_pages/settings.html', context)
+  
 def resend_verification_email(request):
     username = request.GET.get('username')
     try:
