@@ -14,10 +14,34 @@
     <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 </head>
 <body>
+
     <div class="flex items-center justify-center min-h-screen">
         <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg container">
             <form method="POST">
                 {% csrf_token %}
+                {% if messages %}
+                  <div class="mb-4">
+                    {% for message in messages %}
+                      <div
+                        class="p-3 rounded mb-2
+                        {% if message.tags == 'error' %}bg-red-200 text-red-800
+                        {% elif message.tags == 'success' %}bg-green-200 text-green-800
+                        {% else %}bg-gray-200 text-gray-800{% endif %}"
+                        role="alert"
+                      >
+                        {{ message }}
+                      </div>
+                    {% endfor %}
+                  </div>
+                    {% if show_resend_link and not user.email_verified_at %}
+                        <p class="text-center text-sm text-red-600">
+                            Didn't get the email?
+                            <a href="{% url 'resend_verification' %}?username={{ form.data.username }}" class="text-black underline">
+                                Resend Verification Email
+                            </a>
+                        </p>
+                    {% endif %}
+                {% endif %}
 
                 <!-- App Logo + Title -->
                 {% block form_title %}
