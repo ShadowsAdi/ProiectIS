@@ -1,8 +1,10 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
-from .models import Post, Profile
+from .models import Post, Profile, CustomUser
+
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -29,8 +31,38 @@ class RegisterForm(UserCreationForm):
 #asta e file-ul unde trb modificat social_network_app/login
 #foloseste template-ul de la UserCreationForm si adauga email
 
+MAX_FILE_SIZE = 10 * 1024 * 1024 #10 MB
+
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'content']
+        fields = ['title', 'content','files','images']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['title'].required = True
+        self.fields['content'].required = True
+
+    def clean_files(self): #validation method
+        files = self.cleaned_data.get('files')
+        print(f"clean_files received: {files} type: {type(files)}")
+        if files and files.size > MAX_FILE_SIZE:
+            raise ValidationError("Files should not exceed " + str(MAX_FILE_SIZE) + "MB")
+        return files
+
+    def clean_images(self):
+        images = self.cleaned_data.get('images')
+        print(f"clean_files received: {images} type: {type(images)}")
+        if images and images.size > MAX_FILE_SIZE:
+            raise ValidationError("Images should not exceed " + str(MAX_FILE_SIZE) + "MB")
+        return images
+
+class SettingsForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email']
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['gender', 'date_of_birth', 'profile_picture']

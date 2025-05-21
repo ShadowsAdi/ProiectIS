@@ -4,7 +4,7 @@ from .ollama_bridge import analyze
 
 def moderate_post(post_id, comment_id, target_type):
     post = Post.objects.get(pk=post_id)
-    result = analyze(post.content)
+    result = analyze(post.content,post.files,post.images)
 
     data = json.loads(result["response"])
     is_toxic = data["toxicity"].lower() == "toxic"
