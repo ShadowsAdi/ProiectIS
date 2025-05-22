@@ -23,7 +23,8 @@ def analyze(text,files,images):
         except Exception as e:
             content += f"\n\nImage could not be processed: {e}"
 
-    prompt = f"""Classify the following content as "Toxic" or "Not Toxic". 
+    prompt = f"""Classify the following content as "Toxic" or "Not Toxic" based
+    on the content of the text and images. If it promotes something negative, is "Toxic". 
     Respond in JSON with a key 'toxicity' and a confidence percentage.
     Content: \"{content}\""""
 
