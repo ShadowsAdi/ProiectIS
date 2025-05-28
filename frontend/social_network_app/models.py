@@ -139,3 +139,56 @@ class NLPAnalysisLog(models.Model):
 
     def __str__(self):
         return f"NLP Analysis ({self.target_type}) at {self.run_time}"
+
+class UserSettings(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='settings')
+
+    # Profile & Privacy
+    private_account = models.BooleanField(default=False)
+    friend_request_permission = models.CharField(
+        max_length=20,
+        choices=[
+            ('everyone', 'Everyone'),
+            ('friends_of_friends', 'Friends of Friends'),
+            ('no_one', 'No one'),
+        ],
+        default='everyone'
+    )
+
+    email_notifications = models.BooleanField(default=True)
+    push_notifications = models.BooleanField(default=True)
+    
+    # Appearance
+    theme = models.CharField(
+        max_length=10,
+        choices=[
+            ('light', 'Light'),
+            ('dark', 'Dark'),
+            ('auto', 'Auto'),
+        ],
+        default='light'
+    )
+
+    def __str__(self):
+        return f"Settings for {self.user.username}"
+
+class Notification(models.Model):
+    NOTIF_TYPE_CHOICES = [
+        ('friend_request', 'Friend Request'),
+        ('friend_post', 'Friend Post'),
+    ]
+
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')  # who receives the notification
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sent_notifications', null=True, blank=True)  # who triggered it
+    notif_type = models.CharField(max_length=20, choices=NOTIF_TYPE_CHOICES)
+    post = models.ForeignKey(Post, null=True, blank=True, on_delete=models.CASCADE)  # linked post for friend_post type
+    friend_request = models.ForeignKey(Friendships, null=True, blank=True, on_delete=models.CASCADE)  # linked friend request
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Notification {self.notif_type} to {self.user.username} from {self.sender.username if self.sender else 'System'}"

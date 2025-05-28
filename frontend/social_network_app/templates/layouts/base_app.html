@@ -2,7 +2,7 @@
 
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="{% if request.user.settings.theme == 'dark' %}dark-mode-class{% else %}light-mode-class{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,11 +15,11 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
     <!-- Custom styles -->
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base_app.css' %}">
 
     <script src="https://unpkg.com/alpinejs" defer></script>
 </head>
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen ">
     <!-- Topbar -->
     {% include "components/topbar.html" %}
     <div class="flex flex-grow">
@@ -37,8 +37,6 @@
     <!-- Font Awesome (still needed for icons) -->
     <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
 
-    <!-- Custom JS -->
-    <script src="{% static 'scripts.js' %}"></script>
 
 </body>
 </html>

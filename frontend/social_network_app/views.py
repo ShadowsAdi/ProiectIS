@@ -1,15 +1,18 @@
 # social_network_app/views.py
+from datetime import timedelta
 from urllib import request
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.timezone import now
 from django.views.decorators.http import require_POST
+from ibm_platform_services.user_management_v1 import UserSettings
 
-from .forms import RegisterForm, PostForm, SettingsForm, ProfileForm
+from .forms import RegisterForm, PostForm, ProfileForm, UserSettingsForm
 from django.contrib import messages
-from .models import Post, Friendships, Profile, CustomUser
+from .models import Post, Friendships, Profile, CustomUser, UserSettings
 from django.db.models import Q
 
 def register(request):
@@ -50,10 +53,17 @@ def custom_login(request):
 
 
 def home(request):
+
     if not request.user.is_authenticated:
         return redirect('register')
 
     user = request.user
+
+    try:
+        user_settings = user.settings
+    except UserSettings.DoesNotExist:
+        user_settings = UserSettings.objects.create(user=user)
+
     friendships_user = Friendships.objects.filter(
         Q(user1=user) | Q(user2=user),
         status="accepted"
@@ -88,6 +98,7 @@ def home(request):
         'user': request.user.username,
         'posts': all_posts,
         'form': form,
+        'theme': user_settings.theme,
     }
     return render(request, 'app_pages/home.html', context)
 
@@ -125,8 +136,58 @@ def profile(request, username=None):
 @login_required
 def send_friend_request(request, username):
     to_user = get_object_or_404(CustomUser, username=username)
+
     if request.user == to_user:
         return redirect('home')
+
+    user_settings = getattr(to_user, 'settings', None)
+    if not user_settings:
+        # If no settings found, treat as 'everyone'
+        permission = 'everyone'
+    else:
+        permission = user_settings.friend_request_permission
+
+    if permission == 'no_one':
+        # No one can send request
+        # You can add a message here if you want
+        return redirect('user_profile', username=username)
+
+    if permission == 'friends_of_friends':
+        # Check if request.user is friend of friend of to_user
+
+        # Get to_user's friends (accepted)
+        friends_of_to_user = Friendships.objects.filter(
+            (Q(user1=to_user) | Q(user2=to_user)) & Q(status='accepted')
+        )
+
+        # Extract friend user IDs
+        to_user_friend_ids = set()
+        for f in friends_of_to_user:
+            if f.user1 == to_user:
+                to_user_friend_ids.add(f.user2.id)
+            else:
+                to_user_friend_ids.add(f.user1.id)
+
+        # Get request.user's friends (accepted)
+        friends_of_request_user = Friendships.objects.filter(
+            (Q(user1=request.user) | Q(user2=request.user)) & Q(status='accepted')
+        )
+
+        request_user_friend_ids = set()
+        for f in friends_of_request_user:
+            if f.user1 == request.user:
+                request_user_friend_ids.add(f.user2.id)
+            else:
+                request_user_friend_ids.add(f.user1.id)
+
+        # Now check if any friend of request.user is also friend of to_user
+        # That means request.user and to_user share at least one friend
+        common_friends = to_user_friend_ids.intersection(request_user_friend_ids)
+
+        if not common_friends:
+            # Not a friend of friend, so reject request
+            return redirect('user_profile', username=username)
+
     existing = Friendships.objects.filter(
         (Q(user1=request.user) & Q(user2=to_user)) |
         (Q(user1=to_user) & Q(user2=request.user))
@@ -167,31 +228,62 @@ def decline_friend_request(request, username):
     return redirect('notifications')
 
 
+@login_required
 def notifications(request):
-    if not request.user.is_authenticated:
-        return redirect('register')
-    pending_requests = Friendships.objects.filter(user2=request.user, status='pending')
-    return render(request, 'app_pages/notifications.html', {'pending_requests': pending_requests})
+    user = request.user
+    # Pending friend requests
+    pending_requests = Friendships.objects.filter(user2=user, status='pending')
+
+    # Get accepted friendships for the current user
+    friendships = Friendships.objects.filter(
+        (Q(user1=user) | Q(user2=user)),
+        status='accepted'
+    )
+
+    friend_ids = set()
+    for friendship in friendships:
+        if friendship.user1 == user:
+            friend_ids.add(friendship.user2.id)
+        else:
+            friend_ids.add(friendship.user1.id)
+
+    # Optional: Filter recent posts, e.g., last 7 days
+    recent_days = 7
+    recent_date = now() - timedelta(days=recent_days)
+
+    friend_posts = Post.objects.filter(
+        user__id__in=friend_ids,
+        is_published=True,
+        created_at__gte=recent_date
+    ).order_by('-created_at')
+
+    return render(request, 'app_pages/notifications.html', {
+        'pending_requests': pending_requests,
+        'friend_posts': friend_posts,
+    })
 
 @login_required
 def settings(request):
     user = request.user
-    profile = user.profile
+    user_settings, _ = UserSettings.objects.get_or_create(user=user)
+    profile, created = Profile.objects.get_or_create(user=user)
 
     if request.method == 'POST':
-        user_form = SettingsForm(request.POST, instance=user)
         profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
+        settings_form = UserSettingsForm(request.POST, instance=user_settings)
 
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
+        if profile_form.is_valid() and settings_form.is_valid():
             profile_form.save()
-            return redirect('settings')  # redirect to settings after saving
-    else:
-        user_form = SettingsForm(instance=user)
-        profile_form = ProfileForm(instance=profile)
+            settings_form.save()
 
-    context = {
-        'user_form': user_form,
-        'profile_form': profile_form
-    }
-    return render(request, 'app_pages/settings.html', context)
+            messages.success(request, "Settings updated successfully!")
+            return redirect('settings')
+    else:
+        profile_form = ProfileForm(instance=profile)
+        settings_form = UserSettingsForm(instance=user_settings)
+
+    return render(request, 'app_pages/settings.html', {
+        'profile_form': profile_form,
+        'settings_form': settings_form,
+        'theme': user_settings.theme,
+    })
