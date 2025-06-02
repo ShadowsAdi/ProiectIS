@@ -1,0 +1,8 @@
+.dark-mode-class {
+    background-color: #121212 !important;
+    color: #eee !important;
+}
+.light-mode-class {
+    background-color: #fff !important;
+    color: #111 !important;
+}

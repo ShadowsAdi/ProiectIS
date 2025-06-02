@@ -22,4 +22,15 @@
 {% else %}
     <p>No new friend requests.</p>
 {% endif %}
+
+<h2 class="mt-10">Recent Posts From Your Friends</h2>
+{% for post in friend_posts %}
+  <div>
+    <p><strong>{{ post.user.username }}</strong> posted:</p>
+    <p>{{ post.content }}</p>
+    <small>Posted on {{ post.created_at }}</small>
+  </div>
+{% empty %}
+  <p>No recent posts from your friends:</p>
+{% endfor %}
 {% endblock %}

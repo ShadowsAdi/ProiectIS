@@ -8,21 +8,6 @@ OLLAMA_MODEL = "llama3.2:latest"
 def analyze(text,files,images):
     content = text
 
-    for f in files or []:
-        try:
-            file_text = f.read().decode('utf-8')
-            content += f"\n\nFile ({getattr(f, 'name', 'unknown')}):\n{file_text}"
-        except Exception as e:
-            content += f"\n\nFile could not be read: {e}"
-
-    for img in images or []:
-        try:
-            image = Image.open(img)
-            extracted_text = pytesseract.image_to_string(image)
-            content += f"\n\nImage ({getattr(img, 'name', 'unknown')}):\n{extracted_text}"
-        except Exception as e:
-            content += f"\n\nImage could not be processed: {e}"
-
     prompt = f"""Classify the following content as "Toxic" or "Not Toxic". 
     Respond in JSON with a key 'toxicity' and a confidence percentage.
     Content: \"{content}\""""

@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from .models import Post, Profile, CustomUser
+from .models import Post, Profile, CustomUser, UserSettings
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -43,25 +43,14 @@ class PostForm(forms.ModelForm):
         self.fields['title'].required = True
         self.fields['content'].required = True
 
-    def clean_files(self): #validation method
-        files = self.cleaned_data.get('files')
-        print(f"clean_files received: {files} type: {type(files)}")
-        if files and files.size > MAX_FILE_SIZE:
-            raise ValidationError("Files should not exceed " + str(MAX_FILE_SIZE) + "MB")
-        return files
-
-    def clean_images(self):
-        images = self.cleaned_data.get('images')
-        print(f"clean_files received: {images} type: {type(images)}")
-        if images and images.size > MAX_FILE_SIZE:
-            raise ValidationError("Images should not exceed " + str(MAX_FILE_SIZE) + "MB")
-        return images
-
-class SettingsForm(forms.ModelForm):
+class UserSettingsForm(forms.ModelForm):
     class Meta:
-        model = CustomUser
-        fields = ['username', 'email']
-
+        model = UserSettings
+        fields = [
+            'private_account',
+            'friend_request_permission',
+            'theme',
+        ]
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile

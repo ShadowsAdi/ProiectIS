@@ -6,7 +6,11 @@ def moderate_post(post_id, comment_id, target_type):
     post = Post.objects.get(pk=post_id)
     result = analyze(post.content,post.files,post.images)
 
-    data = json.loads(result["response"])
+    try:
+        data = json.loads(result["response"])
+    except (json.JSONDecodeError, TypeError) as e:
+        print("JSON decode failed:", e)
+        data = {}
     is_toxic = data["toxicity"].lower() == "toxic"
 
     NLPAnalysisLog.objects.create(

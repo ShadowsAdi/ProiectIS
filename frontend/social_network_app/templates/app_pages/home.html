@@ -7,11 +7,11 @@
 {% block content %}
     <button onclick="toggleFormVisibility()"
             type="submit"
-            class="create_post_button absolute bottom-20 right-20 bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            class="create_post_button fixed bottom-20 right-20 bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
         Create Post
     </button>
     <!-- Form to Create Post -->
-    <div id="insert_post" class="hidden absolute w-full max-w-md left-1/2 transform -translate-x-1/2 bg-white p-6 rounded-2xl shadow-lg">
+    <div id="insert_post" class="hidden fixed w-full max-w-md left-1/2 transform -translate-x-1/2 bg-white p-6 rounded-2xl shadow-lg">
         <form method="POST" enctype="multipart/form-data" class="space-y-4">
             {% csrf_token %}
             <div>
